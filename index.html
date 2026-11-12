@@ -1,0 +1,1902 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>El Hilo del Cuento — Taller de Comprensión Lectora</title>
+  
+  <!-- Tipografía clínica accesible recomendada por el estudio -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+  <style>
+    /* SISTEMA DE TOKENS DE DISEÑO (Foco Táctil Acromático) */
+    :root {
+      --bg-surface: #F7F4EE;         /* Hueso cálido antirreflejo */
+      --bg-card: #FFFFFF;            /* Blanco puro para tarjetas legibles */
+      --text-main: #2B2A27;          /* Grafito carbón para lectura descansada */
+      --text-muted: #57534E;         /* Tono medio para leyendas y pasos */
+      --border-neutral: #8C8881;     /* Trazos neutros de estructura */
+      --border-slot: #D6D1C7;        /* Casillas receptoras en reposo */
+      --slot-bg: #EAE6DD;            /* Fondo de casillas vacías */
+      
+      /* Acentos táctiles semánticos */
+      --accent-touch: #D97706;       /* Ámbar cálido para elemento seleccionado */
+      --accent-action: #0F4C5C;      /* Azul petróleo para acción principal */
+      --accent-action-hover: #166074;
+      --accent-action-disabled: #A8A29E;
+      --accent-success: #15803D;     /* Verde esmeralda para validación correcta */
+      --accent-clue-bg: #FEF3C7;     /* Fondo ámbar suave de pista pedagógica */
+      --accent-clue-border: #F59E0B;
+      
+      --font-family: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --shadow-sm: 0 2px 4px rgba(43, 42, 39, 0.06);
+      --shadow-md: 0 4px 12px rgba(43, 42, 39, 0.08);
+      --shadow-lg: 0 10px 24px rgba(43, 42, 39, 0.12);
+      
+      --touch-target-min: 56px;      /* Altura ergonómica para dedos de 7 a 8 años */
+    }
+
+    /* REAJUSTE GLOBAL */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: #262422; /* Fondo de escritorio para enmarcar móvil */
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* MARCO DEL DISPOSITIVO MÓVIL */
+    .app-viewport {
+      width: 100%;
+      max-width: 440px;
+      height: 100vh;
+      max-height: 900px;
+      background-color: var(--bg-surface);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+    }
+
+    @media (min-width: 480px) {
+      .app-viewport {
+        height: 94vh;
+        border-radius: 32px;
+        border: 8px solid #1C1917;
+      }
+    }
+
+    /* CABECERA GENERAL */
+    .app-header {
+      height: 64px;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1.5px solid #E2DDD3;
+      background-color: var(--bg-surface);
+      z-index: 20;
+      flex-shrink: 0;
+    }
+
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.01em;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background-color: var(--accent-action);
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border-neutral);
+      background-color: #FFF;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.15s, transform 0.1s;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.92);
+      background-color: #EAE6DD;
+    }
+
+    /* CONTENEDOR DE PANTALLAS */
+    .screen-container {
+      flex: 1;
+      position: relative;
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      padding: 18px;
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+    }
+
+    .screen.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    /* ==========================================================
+       PANTALLA 1: BIBLIOTECA INICIAL (CARDS DESLIZABLES HORIZONTALES)
+       ========================================================== */
+    .hero-greeting {
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-size: 1.45rem;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 4px;
+      color: var(--text-main);
+    }
+
+    .hero-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* CARRUSEL HORIZONTAL OBLIGATORIO DE CARDS */
+    .carousel-section {
+      margin: 12px -18px 20px -18px;
+      padding: 0 18px;
+    }
+
+    .carousel-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .carousel-track {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 16px;
+      scrollbar-width: none; /* Firefox */
+    }
+
+    .carousel-track::-webkit-scrollbar {
+      display: none; /* Chrome / Safari */
+    }
+
+    .story-card {
+      flex: 0 0 280px;
+      scroll-snap-align: center;
+      background-color: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 2px solid #E2DDD3;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .story-card:hover {
+      border-color: var(--accent-action);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .story-card:active {
+      transform: scale(0.98);
+    }
+
+    .story-card-cover {
+      width: 100%;
+      height: 190px;
+      background-color: #EFECE6;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .story-card-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .story-card-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: rgba(43, 42, 39, 0.85);
+      color: #FFF;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.04em;
+    }
+
+    .story-card-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      justify-content: space-between;
+    }
+
+    .story-card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      line-height: 1.3;
+      color: var(--text-main);
+    }
+
+    .story-card-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+
+    .story-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid #F0ECE4;
+      padding-top: 12px;
+    }
+
+    .story-card-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .btn-read {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      background-color: var(--accent-action);
+      color: #FFF;
+      font-weight: 700;
+      font-size: 0.85rem;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* ==========================================================
+       PANTALLA 2: LECTURA GUIADA (TEXTO EN 20PT + IMAGEN 4:3)
+       ========================================================== */
+    .reading-progress-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .progress-dot {
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background-color: #E2DDD3;
+      transition: background-color 0.25s;
+    }
+
+    .progress-dot.active {
+      background-color: var(--accent-action);
+    }
+
+    .reading-step-counter {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .reading-illustration-box {
+      width: 100%;
+      height: 220px;
+      background-color: #EFECE6;
+      border-radius: var(--radius-md);
+      border: 2px solid #E2DDD3;
+      overflow: hidden;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .reading-illustration-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .reading-text-card {
+      background-color: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1.5px solid #E2DDD3;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .reading-text-body {
+      font-size: 1.15rem; /* ~18-20pt */
+      line-height: 1.55;
+      color: var(--text-main);
+      text-align: left;
+      text-wrap: pretty;
+    }
+
+    /* Palabras con diccionario al toque */
+    .glossary-word {
+      background-color: #FEEBC8;
+      border-bottom: 2px solid var(--accent-touch);
+      border-radius: 4px;
+      padding: 1px 4px;
+      cursor: pointer;
+      font-weight: 700;
+      color: #92400E;
+    }
+
+    .glossary-word:active {
+      background-color: #FBD38D;
+    }
+
+    .reading-nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: auto;
+      padding-top: 8px;
+    }
+
+    /* ==========================================================
+       PANTALLA 3: MESA DE ORDENACIÓN (MECÁNICA DUAL TÁCTIL)
+       ========================================================== */
+    .challenge-intro {
+      margin-bottom: 12px;
+      text-align: left;
+    }
+
+    .challenge-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .challenge-instruction {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* CASILLAS RECEPTORAS NUMERADAS 1 A 4 */
+    .slots-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .drop-slot {
+      min-height: var(--touch-target-min);
+      background-color: var(--slot-bg);
+      border: 2px dashed var(--border-neutral);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      padding: 6px 12px;
+      position: relative;
+      transition: background-color 0.2s, border-color 0.2s, transform 0.15s;
+    }
+
+    .drop-slot.drag-over {
+      background-color: #FEF3C7;
+      border-color: var(--accent-touch);
+      border-style: solid;
+      transform: scale(1.02);
+    }
+
+    .drop-slot.filled {
+      border-style: solid;
+      border-color: #CBD5E1;
+      background-color: #FFF;
+    }
+
+    .slot-index {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background-color: var(--text-muted);
+      color: #FFF;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    .drop-slot.filled .slot-index {
+      background-color: var(--accent-action);
+    }
+
+    .slot-placeholder-text {
+      font-size: 0.85rem;
+      color: #8C8881;
+      font-style: italic;
+    }
+
+    /* BANDEJA DE TARJETAS DESORDENADAS */
+    .cards-tray-header {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .cards-tray {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+      min-height: 120px;
+      padding: 10px;
+      background-color: rgba(226, 221, 211, 0.45);
+      border-radius: var(--radius-md);
+      border: 1px solid #E2DDD3;
+    }
+
+    /* TARJETA INTERACTIVA DE ACONTECIMIENTO */
+    .order-card {
+      min-height: 52px;
+      background-color: #FFF;
+      border: 2px solid var(--border-neutral);
+      border-radius: var(--radius-sm);
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--shadow-sm);
+      cursor: grab;
+      touch-action: none;
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    }
+
+    .order-card:active {
+      cursor: grabbing;
+    }
+
+    .order-card.selected-for-touch {
+      border-color: var(--accent-touch);
+      border-width: 3px;
+      background-color: #FFFDF9;
+      box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .order-card.correct-locked {
+      border-color: var(--accent-success);
+      background-color: #F0FDF4;
+      cursor: default;
+    }
+
+    .card-thumb {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      background-color: #EFECE6;
+      overflow: hidden;
+      flex-shrink: 0;
+      border: 1px solid #D6D1C7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-phrase {
+      font-size: 0.92rem;
+      font-weight: 700;
+      line-height: 1.35;
+      color: var(--text-main);
+      text-align: left;
+    }
+
+    /* ==========================================================
+       PANTALLA 4: PISTA AMABLE (BOCADILLO DE DIÁLOGO)
+       ========================================================== */
+    .clue-box {
+      display: none;
+      background-color: var(--accent-clue-bg);
+      border: 2px solid var(--accent-clue-border);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      font-size: 0.92rem;
+      line-height: 1.4;
+      color: #78350F;
+      position: relative;
+      animation: popIn 0.25s ease-out;
+    }
+
+    .clue-box.visible {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .clue-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.95); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ==========================================================
+       PANTALLA 5: RESUMEN Y CIERRE SERENO
+       ========================================================== */
+    .success-hero {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .success-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: #DCFCE7;
+      color: var(--accent-success);
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+    }
+
+    .success-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .success-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* TIRA RESUMEN DE TARJETAS HORIZONTALES ORDENADAS */
+    .final-timeline-track {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding: 10px 4px 18px 4px;
+      margin-bottom: 16px;
+      scrollbar-width: none;
+    }
+
+    .final-timeline-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .final-card-item {
+      flex: 0 0 240px;
+      scroll-snap-align: start;
+      background-color: #FFF;
+      border: 2px solid var(--accent-success);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .final-card-img {
+      width: 100%;
+      height: 140px;
+      background-color: #EFECE6;
+      overflow: hidden;
+    }
+
+    .final-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .final-card-info {
+      padding: 12px;
+    }
+
+    .final-card-num {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent-success);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .final-card-text {
+      font-size: 0.85rem;
+      font-weight: 700;
+      line-height: 1.35;
+      color: var(--text-main);
+    }
+
+    /* BOTONES PRIMARIOS Y SECUNDARIOS */
+    .btn-primary {
+      height: var(--touch-target-min);
+      background-color: var(--accent-action);
+      color: #FFF;
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-family);
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: background-color 0.15s, transform 0.1s;
+      width: 100%;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--accent-action-hover);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    .btn-primary:disabled {
+      background-color: var(--accent-action-disabled);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      height: var(--touch-target-min);
+      background-color: #FFF;
+      color: var(--text-main);
+      border: 1.5px solid var(--border-neutral);
+      border-radius: var(--radius-md);
+      font-family: var(--font-family);
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: background-color 0.15s;
+      width: 100%;
+    }
+
+    .btn-secondary:active {
+      background-color: #EAE6DD;
+    }
+
+    /* MODAL PEDAGÓGICO DE ENFOQUE DEL PROYECTO */
+    .modal-backdrop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(38, 36, 34, 0.7);
+      backdrop-filter: blur(3px);
+      z-index: 100;
+      display: none;
+      align-items: flex-end;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-sheet {
+      width: 100%;
+      max-height: 85%;
+      background-color: var(--bg-surface);
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      padding: 24px 20px;
+      overflow-y: auto;
+      box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.25);
+      animation: slideUp 0.25s ease-out;
+      border-top: 2px solid #D6D1C7;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1.5px solid #E2DDD3;
+      padding-bottom: 10px;
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-body p {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 12px;
+      color: var(--text-main);
+      text-align: justify;
+    }
+
+    .modal-section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent-action);
+      margin: 16px 0 6px 0;
+    }
+
+    /* MODAL DE DICCIONARIO VISUAL AL TOQUE */
+    .glossary-modal {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 88%;
+      background-color: #FFF;
+      border: 2px solid var(--accent-action);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-lg);
+      z-index: 110;
+      display: none;
+    }
+
+    .glossary-modal.open {
+      display: block;
+      animation: popIn 0.2s ease-out;
+    }
+
+    .glossary-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--accent-action);
+      margin-bottom: 6px;
+    }
+
+    .glossary-def {
+      font-size: 0.95rem;
+      line-height: 1.45;
+      color: var(--text-main);
+      margin-bottom: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CONTENEDOR PRINCIPAL DEL DISPOSITIVO MÓVIL -->
+  <main class="app-viewport">
+    
+    <!-- CABECERA INSTITUCIONAL Y DE ACCIONES -->
+    <header class="app-header">
+      <div class="brand-mark" onclick="goToScreen(1)">
+        <span class="brand-icon">H</span>
+        <span>El Hilo del Cuento</span>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="audioToggleBtn" title="Activar/Silenciar sonido" aria-label="Control de audio">
+          <span id="audioIcon">🔊</span>
+        </button>
+        <button class="icon-btn" id="infoBtn" title="Enfoque del Proyecto" aria-label="Información pedagógica">
+          ℹ️
+        </button>
+      </div>
+    </header>
+
+    <!-- ZONA DINÁMICA DE PANTALLAS -->
+    <div class="screen-container">
+
+      <!-- ==========================================================
+           PANTALLA 1: SELECCIÓN DE CUENTO (CARRUSEL HORIZONTAL OBLIGATORIO)
+           ========================================================== -->
+      <section class="screen active" id="screen-1">
+        <div class="hero-greeting">
+          <h1 class="hero-title">¿Qué historia ordenamos hoy?</h1>
+          <p class="hero-subtitle">Lee con calma y descubre cómo se encadenan sus momentos.</p>
+        </div>
+
+        <div class="carousel-section">
+          <div class="carousel-label">
+            <span>Cuentos disponibles</span>
+            <span>Desliza para ver más 👉</span>
+          </div>
+
+          <!-- CARDS DESLIZABLES HORIZONTALMENTE -->
+          <div class="carousel-track" id="storiesCarouselTrack">
+            
+            <!-- CARD 1: LOS TRES CERDITOS (ACTIVO EN ESTA POC) -->
+            <article class="story-card" onclick="startStory('cerditos')">
+              <div class="story-card-cover">
+                <img src="assets/portada_cerditos.jpg" alt="Portada Los tres cerditos" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'280\' height=\'190\' viewBox=\'0 0 280 190\'><rect fill=\'%23F5EBE1\' width=\'280\' height=\'190\'/><text x=\'50%25\' y=\'50%25\' font-family=\'sans-serif\' font-size=\'16\' font-weight=\'bold\' fill=\'%238C8881\' text-anchor=\'middle\'>🐷 Los tres cerditos</text></svg>'">
+                <span class="story-card-badge">4 pasos</span>
+              </div>
+              <div class="story-card-body">
+                <div>
+                  <h2 class="story-card-title">Los tres cerditos</h2>
+                  <p class="story-card-desc">Tres hermanos construyen sus casas y se enfrentan al lobo feroz.</p>
+                </div>
+                <div class="story-card-footer">
+                  <span class="story-card-meta">⏱ 6 min · Nivel 2º Primaria</span>
+                  <button class="btn-read">Leer</button>
+                </div>
+              </div>
+            </article>
+
+            <!-- CARD 2: LA LIEBRE Y LA TORTUGA -->
+            <article class="story-card" onclick="startStory('liebre')">
+              <div class="story-card-cover">
+                <img src="assets/portada_liebre_tortuga.jpg" alt="Portada La liebre y la tortuga" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'280\' height=\'190\' viewBox=\'0 0 280 190\'><rect fill=\'%23E8F0E6\' width=\'280\' height=\'190\'/><text x=\'50%25\' y=\'50%25\' font-family=\'sans-serif\' font-size=\'16\' font-weight=\'bold\' fill=\'%238C8881\' text-anchor=\'middle\'>🐢 La liebre y la tortuga</text></svg>'">
+                <span class="story-card-badge">4 pasos</span>
+              </div>
+              <div class="story-card-body">
+                <div>
+                  <h2 class="story-card-title">La liebre y la tortuga</h2>
+                  <p class="story-card-desc">Una célebre carrera campestre donde la constancia vence a la soberbia.</p>
+                </div>
+                <div class="story-card-footer">
+                  <span class="story-card-meta">⏱ 5 min · Nivel 2º Primaria</span>
+                  <button class="btn-read">Leer</button>
+                </div>
+              </div>
+            </article>
+
+            <!-- CARD 3: EL FLAUTISTA DE HAMELÍN -->
+            <article class="story-card" onclick="startStory('flautista')">
+              <div class="story-card-cover">
+                <img src="assets/portada_flautista.jpg" alt="Portada El flautista de Hamelín" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'280\' height=\'190\' viewBox=\'0 0 280 190\'><rect fill=\'%23EBE5F0\' width=\'280\' height=\'190\'/><text x=\'50%25\' y=\'50%25\' font-family=\'sans-serif\' font-size=\'16\' font-weight=\'bold\' fill=\'%238C8881\' text-anchor=\'middle\'>🎶 El flautista de Hamelín</text></svg>'">
+                <span class="story-card-badge">4 pasos</span>
+              </div>
+              <div class="story-card-body">
+                <div>
+                  <h2 class="story-card-title">El flautista de Hamelín</h2>
+                  <p class="story-card-desc">Una melodía mágica libera a la ciudad de una invasión inesperada.</p>
+                </div>
+                <div class="story-card-footer">
+                  <span class="story-card-meta">⏱ 6 min · Nivel 2º Primaria</span>
+                  <button class="btn-read">Leer</button>
+                </div>
+              </div>
+            </article>
+
+          </div>
+        </div>
+
+        <div style="background-color:#FFF; border-radius:14px; border:1.5px solid #E2DDD3; padding:14px; margin-top:auto;">
+          <p style="font-size:0.85rem; color:var(--text-muted); line-height:1.4;">
+            💡 <strong>Consejo para el lector:</strong> Toca las palabras destacadas en amarillo si no entiendes su significado. Al terminar la lectura, ordenaremos los cuatro pasos principales.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ==========================================================
+           PANTALLA 2: LECTURA GUIADA (PASO A PASO CON ILUSTRACIÓN)
+           ========================================================== -->
+      <section class="screen" id="screen-2">
+        <div class="reading-step-counter" id="readingStepCounter">Parte 1 de 4</div>
+        <div class="reading-progress-bar" id="readingProgressBar">
+          <div class="progress-dot active"></div>
+          <div class="progress-dot"></div>
+          <div class="progress-dot"></div>
+          <div class="progress-dot"></div>
+        </div>
+
+        <div class="reading-illustration-box">
+          <img id="readingIllustration" src="" alt="Ilustración de la escena" onerror="this.style.display='none'">
+        </div>
+
+        <div class="reading-text-card">
+          <p class="reading-text-body" id="readingTextContent">
+            <!-- Texto inyectado por JS -->
+          </p>
+        </div>
+
+        <div class="reading-nav-bar">
+          <button class="btn-secondary" id="btnPrevScene" onclick="prevScene()" style="width: 44%;">
+            ← Anterior
+          </button>
+          <button class="btn-primary" id="btnNextScene" onclick="nextScene()" style="width: 52%;">
+            Siguiente →
+          </button>
+        </div>
+      </section>
+
+
+      <!-- ==========================================================
+           PANTALLA 3: MESA DE ORDENACIÓN (ARRASATRAR Y SOLTAR + TOQUE ASISTIDO)
+           ========================================================== -->
+      <section class="screen" id="screen-3">
+        <div class="challenge-intro">
+          <h2 class="challenge-title">Ordena la historia</h2>
+          <p class="challenge-instruction">
+            Arrastra las tarjetas a las casillas o <strong>toca una tarjeta y luego su casilla</strong>.
+          </p>
+        </div>
+
+        <!-- BOCADILLO DE PISTA AMABLE (SE ACTIVA EN CASO DE ERROR) -->
+        <div class="clue-box" id="clueBox">
+          <span class="clue-icon">💡</span>
+          <span id="clueText">Piensa en lo que pasó primero.</span>
+        </div>
+
+        <!-- CUATRO CASILLAS RECEPTORAS -->
+        <div class="slots-container" id="slotsContainer">
+          <div class="drop-slot" data-slot="1" onclick="handleSlotClick(1)">
+            <span class="slot-index">1</span>
+            <span class="slot-placeholder-text">¿Cómo empezó la historia?</span>
+          </div>
+          <div class="drop-slot" data-slot="2" onclick="handleSlotClick(2)">
+            <span class="slot-index">2</span>
+            <span class="slot-placeholder-text">¿Qué sucedió después?</span>
+          </div>
+          <div class="drop-slot" data-slot="3" onclick="handleSlotClick(3)">
+            <span class="slot-index">3</span>
+            <span class="slot-placeholder-text">El momento más emocionante...</span>
+          </div>
+          <div class="drop-slot" data-slot="4" onclick="handleSlotClick(4)">
+            <span class="slot-index">4</span>
+            <span class="slot-placeholder-text">¿Cómo terminó el relato?</span>
+          </div>
+        </div>
+
+        <!-- BANDEJA DE TARJETAS DESORDENADAS -->
+        <div class="cards-tray-header">Tarjetas por colocar</div>
+        <div class="cards-tray" id="cardsTray" onclick="handleTrayClick()">
+          <!-- Tarjetas inyectadas por JS -->
+        </div>
+
+        <div style="margin-top: auto;">
+          <button class="btn-primary" id="btnCheckOrder" onclick="evaluateOrder()" disabled>
+            Comprobar orden
+          </button>
+        </div>
+      </section>
+
+
+      <!-- ==========================================================
+           PANTALLA 5: RESUMEN FINAL Y CIERRE SERENO
+           ========================================================== -->
+      <section class="screen" id="screen-5">
+        <div class="success-hero">
+          <span class="success-badge">✔ Historia completada</span>
+          <h2 class="success-title" id="finalHeroTitle">¡Excelente reconstrucción!</h2>
+          <p class="success-desc" id="finalHeroDesc">
+            Has ordenado los acontecimientos exactamente como ocurrieron de principio a fin.
+          </p>
+        </div>
+
+        <div class="carousel-label" style="padding: 0 4px;">
+          <span>El cuento en orden completo</span>
+          <span>Desliza para repasar 👉</span>
+        </div>
+
+        <!-- TIRA ILUSTRADA HORIZONTAL DESLIZABLE -->
+        <div class="final-timeline-track" id="finalTimelineTrack">
+          <!-- Inyectado por JS -->
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:auto;">
+          <button class="btn-primary" onclick="goToScreen(1)">
+            Elegir otro cuento
+          </button>
+          <button class="btn-secondary" onclick="finishSession()">
+            Terminar lectura por hoy
+          </button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- MODAL DE ENFOQUE DEL PROYECTO Y CARACTERÍSTICAS DIFERENCIALES -->
+    <div class="modal-backdrop" id="infoModalBackdrop" onclick="closeInfoModal(event)">
+      <div class="modal-sheet" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title">Enfoque del Proyecto</div>
+          <button class="modal-close-btn" onclick="toggleInfoModal(false)">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-section-title">1. Público Objetivo Específico</div>
+          <p>
+            Esta prueba de concepto se enfoca en niños y niñas de <strong>7 a 8 años (segundo curso de Primaria)</strong>. A los 6 años la interacción motriz de arrastre sobre teléfono móvil provoca frustración física y la atención se vuelca en la decodificación silábica; a los 10 años ordenar cuatro escenas resulta trivial. El tramo de 7 a 8 años es el momento evolutivo donde se afianza la comprensión de relaciones causa-efecto en sesiones de 5 a 8 minutos en el hogar o apoyo escolar.
+          </p>
+
+          <div class="modal-section-title">2. Enfoque Concreto</div>
+          <p>
+            Se adopta una única idea central: la <strong>reconstrucción secuencial y cronológica</strong> de relatos tradicionales mediante cuatro momentos estructurales (planteamiento, conflicto, clímax y desenlace). No se dispersa la atención en compras, avatares ni clasificaciones competitivas.
+          </p>
+
+          <div class="modal-section-title">3. Características Diferenciales Frente a Otras Propuestas</div>
+          <p>
+            • <strong>Ausencia total de cronómetros:</strong> Los estudios de Delgado y Salmerón demuestran que la prisa en pantallas perjudica la comprensión profunda.
+          </p>
+          <p>
+            • <strong>Sin mecánicas punitivas:</strong> No hay pérdida de vidas ni castigos que generen sobrejustificación conductual (Deci, Ryan y Lepper). El error se gestiona mediante anclaje de aciertos y pistas contextuales amables.
+          </p>
+          <p>
+            • <strong>Foco Táctil Acromático:</strong> Interfaz en escala neutra de hueso y piedra (#F7F4EE, #2B2A27) para ceder todo el protagonismo a la lectura y reservar el color exclusivamente para la respuesta motriz.
+          </p>
+          <p>
+            • <strong>Tipografía Atkinson Hyperlegible:</strong> Seleccionada para evitar la confusión entre caracteres simétricos (b/d, p/q, l/I/1) respaldada en pruebas de seguimiento ocular, superando las fuentes artificialmente deformadas.
+          </p>
+          <p>
+            • <strong>Interacción Dual Inclusiva:</strong> Soporta arrastrar y soltar nativo o pulsación asistida (tocar tarjeta y tocar casilla) para sortear la imprecisión en pantallas pequeñas.
+          </p>
+          <p>
+            • <strong>Entorno Seguro y Limpio:</strong> Sin publicidad, sin recopilación de datos de menores conforme al RGPD y LOPDGDD, y contenido íntegro en un único archivo autónomo listo para GitHub Pages.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DE DICCIONARIO VISUAL AL TOQUE -->
+    <div class="glossary-modal" id="glossaryModal">
+      <div class="glossary-title" id="glossaryTerm">Término</div>
+      <div class="glossary-def" id="glossaryDesc">Definición clara y cotidiana para el lector.</div>
+      <button class="btn-primary" style="height:44px; font-size:0.9rem;" onclick="closeGlossary()">
+        Entendido
+      </button>
+    </div>
+
+  </main>
+
+  <!-- LÓGICA DE APLICACIÓN EN JAVASCRIPT PURO -->
+  <script>
+    /* ==========================================================
+       DATOS EDITORIALES DE LOS CUENTOS
+       ========================================================== */
+    const STORIES_DATA = {
+      cerditos: {
+        id: 'cerditos',
+        title: 'Los tres cerditos',
+        moral: 'La paciencia y el esfuerzo dan el mejor resultado cuando nos protegemos en equipo.',
+        scenes: [
+          {
+            index: 1,
+            image: 'assets/cerditos_escena_1.jpg',
+            text: 'Tres cerditos hermanos decidieron construir sus propias casas en el bosque. El cerdito más pequeño, con prisa por irse a jugar, levantó una cabaña de <span class="glossary-word" onclick="showGlossary(\'haces de paja\', \'Montones atados de tallos secos de trigo o cebada, ligeros pero poco resistentes.\')">haces de paja</span> en un periquete.',
+            cardSummary: 'El cerdito pequeño construye su cabaña de paja con prisa.',
+            clue: 'Recuerda cuál fue la primera casa que se construyó para irse a jugar rápido.'
+          },
+          {
+            index: 2,
+            image: 'assets/cerditos_escena_2.jpg',
+            text: 'El cerdito mediano construyó una cabaña con tablas de madera. Mientras tanto, el cerdito mayor trabajó con paciencia colocando ladrillos rojos y <span class="glossary-word" onclick="showGlossary(\'cemento\', \'Mezcla de arena y agua que al secarse se pone tan dura como una piedra.\')">cemento</span> para que su casa fuera fuerte.',
+            cardSummary: 'El cerdito mayor levanta una casa sólida con ladrillos.',
+            clue: 'Piensa en el hermano que prefirió trabajar con esfuerzo y paciencia con los ladrillos.'
+          },
+          {
+            index: 3,
+            image: 'assets/cerditos_escena_3.jpg',
+            text: 'Pronto llegó el lobo feroz a la colina con mucha hambre. Llenó sus pulmones de aire y sopló con todas sus fuerzas, derribando las casas de paja y de madera en un instante.',
+            cardSummary: 'El lobo sopla con fuerza y derriba la paja y la madera.',
+            clue: 'Fíjate en el momento en que el lobo infla los carrillos para tirar las dos casas débiles.'
+          },
+          {
+            index: 4,
+            image: 'assets/cerditos_escena_4.jpg',
+            text: 'Los dos cerditos corrieron a refugiarse en la sólida casa de ladrillo. El lobo sopló y sopló hasta quedarse sin aliento, pero la casa resistió y el lobo se marchó derrotado.',
+            cardSummary: 'La casa de ladrillo resiste y los cerditos quedan a salvo.',
+            clue: 'El desenlace: los tres hermanos están juntos y protegidos tras la ventana.'
+          }
+        ]
+      },
+      liebre: {
+        id: 'liebre',
+        title: 'La liebre y la tortuga',
+        moral: 'Con constancia y paso firme se alcanzan grandes metas, sin confiarse ni burlarse de los demás.',
+        scenes: [
+          {
+            index: 1,
+            image: 'assets/portada_liebre_tortuga.jpg',
+            text: 'La liebre del bosque presumía de ser el animal más veloz de la comarca. Cansada de sus burlas, la tortuga la desafió con una sonrisa a una carrera de velocidad por el sendero.',
+            cardSummary: 'La liebre presume de veloz y la tortuga la reta a correr.',
+            clue: '¿Cómo empezó todo? Con el desafío entre los dos animales.'
+          },
+          {
+            index: 2,
+            image: 'assets/portada_liebre_tortuga.jpg',
+            text: 'Al sonar la salida, la liebre salió disparada y en pocos minutos sacó una ventaja enorme. La tortuga, en cambio, comenzó su camino paso a paso, con ritmo firme y constante.',
+            cardSummary: 'La liebre toma mucha ventaja y la tortuga avanza despacio.',
+            clue: 'El inicio de la carrera, cuando la liebre se aleja a gran velocidad.'
+          },
+          {
+            index: 3,
+            image: 'assets/portada_liebre_tortuga.jpg',
+            text: 'Al verse tan lejos de su rival, la liebre pensó que tenía tiempo de sobra. Se tumbó bajo la sombra de un árbol frondoso y se quedó profundamente dormida.',
+            cardSummary: 'La liebre se confía y se echa a dormir bajo un árbol.',
+            clue: 'El error de la liebre al confiarse y cerrar los ojos en mitad de la prueba.'
+          },
+          {
+            index: 4,
+            image: 'assets/portada_liebre_tortuga.jpg',
+            text: 'La tortuga continuó avanzando sin detenerse ni un solo segundo. Cuando la liebre despertó asustada y echó a correr, la tortuga ya estaba cruzando la cinta de la meta entre aplausos.',
+            cardSummary: 'La tortuga cruza la meta mientras la liebre despierta tarde.',
+            clue: 'El final de la carrera con la llegada de la tortuga a la meta.'
+          }
+        ]
+      },
+      flautista: {
+        id: 'flautista',
+        title: 'El flautista de Hamelín',
+        moral: 'Cumplir lo prometido y actuar con honestidad es indispensable para vivir en armonía.',
+        scenes: [
+          {
+            index: 1,
+            image: 'assets/portada_flautista.jpg',
+            text: 'La hermosa ciudad de Hamelín se vio invadida por miles de ratones traviesos. Los animales andaban por todas las despensas y los vecinos ya no sabían cómo resolver la situación.',
+            cardSummary: 'Una plaga de ratones invade las despensas de Hamelín.',
+            clue: 'El problema inicial que afligía a toda la ciudad de Hamelín.'
+          },
+          {
+            index: 2,
+            image: 'assets/portada_flautista.jpg',
+            text: 'Un día llegó a la plaza un joven forastero con una pluma en el sombrero y una flauta dorada. Prometió al alcalde liberar la villa de los ratones a cambio de una recompensa justa.',
+            cardSummary: 'Llega un misterioso flautista prometiendo ayudar al pueblo.',
+            clue: 'La aparición del músico forastero ofreciendo su solución.'
+          },
+          {
+            index: 3,
+            image: 'assets/portada_flautista.jpg',
+            text: 'El músico comenzó a tocar una dulce melodía por las callejuelas. Al escuchar las notas, todos los ratones salieron de sus escondites y lo siguieron en fila hasta el río, lejos del pueblo.',
+            cardSummary: 'El flautista toca su melodía y los ratones lo siguen al río.',
+            clue: 'La música mágica que guía a los ratones fuera de las murallas.'
+          },
+          {
+            index: 4,
+            image: 'assets/portada_flautista.jpg',
+            text: 'Con la ciudad limpia y tranquila, los habitantes celebraron la paz recuperada y agradecieron al flautista su prodigiosa ayuda con canciones y alegría.',
+            cardSummary: 'El pueblo de Hamelín queda limpio y celebra la victoria.',
+            clue: 'El desenlace con la tranquilidad y celebración de los vecinos.'
+          }
+        ]
+      }
+    };
+
+    /* ==========================================================
+       ESTADO DE LA APLICACIÓN
+       ========================================================== */
+    let currentStory = null;
+    let currentSceneIndex = 0;
+    let audioEnabled = true;
+
+    // Estado de la mesa de ordenación
+    // slotOccupants[slotNumber 1..4] = sceneIndex
+    let slotOccupants = { 1: null, 2: null, 3: null, 4: null };
+    let selectedCardForTouch = null; // escena seleccionada para toque asistido
+    let draggedSceneIndex = null;    // para Drag & Drop nativo y táctil
+
+    /* ==========================================================
+       SINTETIZADOR DE AUDIO AMABLE (WEB AUDIO API)
+       ========================================================== */
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) audioCtx = new AudioContextClass();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playSound(type) {
+      if (!audioEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+
+        const now = ctx.currentTime;
+
+        if (type === 'tap') {
+          // Golpe de madera cálido y suave
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(420, now);
+          osc.frequency.exponentialRampToValueAtTime(140, now + 0.08);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'drop') {
+          // Chasquido táctil de encaje
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(260, now);
+          osc.frequency.exponentialRampToValueAtTime(180, now + 0.1);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.1);
+        } else if (type === 'success') {
+          // Melodía pentatónica serena y alegre (Do, Mi, Sol, La, Do agudo)
+          const notes = [523.25, 659.25, 783.99, 880.00, 1046.50];
+          notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const noteStart = now + i * 0.12;
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, noteStart);
+            gain.gain.setValueAtTime(0.22, noteStart);
+            gain.gain.exponentialRampToValueAtTime(0.001, noteStart + 0.4);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(noteStart);
+            osc.stop(noteStart + 0.45);
+          });
+        } else if (type === 'clue') {
+          // Dos notas armónicas suaves que invitan a reflexionar
+          const notes = [440, 392];
+          notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const noteStart = now + i * 0.14;
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, noteStart);
+            gain.gain.setValueAtTime(0.18, noteStart);
+            gain.gain.exponentialRampToValueAtTime(0.001, noteStart + 0.35);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(noteStart);
+            osc.stop(noteStart + 0.38);
+          });
+        }
+      } catch (e) {
+        console.warn('Audio no disponible:', e);
+      }
+    }
+
+    // Control de silencio
+    document.getElementById('audioToggleBtn').addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      document.getElementById('audioIcon').textContent = audioEnabled ? '🔊' : '🔇';
+      if (audioEnabled) playSound('tap');
+    });
+
+    /* ==========================================================
+       CONTROL DE FLUJO DE PANTALLAS
+       ========================================================== */
+    function goToScreen(screenNumber) {
+      playSound('tap');
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(`screen-${screenNumber}`);
+      if (target) {
+        target.classList.add('active');
+        document.querySelector('.screen-container').scrollTop = 0;
+      }
+    }
+
+    /* ==========================================================
+       PANTALLA 1 -> PANTALLA 2: INICIAR CUENTO
+       ========================================================== */
+    function startStory(storyId) {
+      currentStory = STORIES_DATA[storyId];
+      if (!currentStory) return;
+      currentSceneIndex = 0;
+      renderCurrentScene();
+      goToScreen(2);
+    }
+
+    function renderCurrentScene() {
+      const scene = currentStory.scenes[currentSceneIndex];
+      document.getElementById('readingStepCounter').textContent = `Parte ${currentSceneIndex + 1} de 4 · ${currentStory.title}`;
+      
+      // Actualizar barra de progreso
+      const dots = document.querySelectorAll('#readingProgressBar .progress-dot');
+      dots.forEach((dot, idx) => {
+        if (idx <= currentSceneIndex) {
+          dot.classList.add('active');
+        } else {
+          dot.classList.remove('active');
+        }
+      });
+
+      // Ilustración
+      const imgEl = document.getElementById('readingIllustration');
+      imgEl.src = scene.image;
+      imgEl.style.display = 'block';
+
+      // Texto de lectura
+      document.getElementById('readingTextContent').innerHTML = scene.text;
+
+      // Botones
+      const btnPrev = document.getElementById('btnPrevScene');
+      const btnNext = document.getElementById('btnNextScene');
+
+      if (currentSceneIndex === 0) {
+        btnPrev.style.visibility = 'hidden';
+      } else {
+        btnPrev.style.visibility = 'visible';
+      }
+
+      if (currentSceneIndex === currentStory.scenes.length - 1) {
+        btnNext.textContent = '¡Ordenar el cuento! ➔';
+      } else {
+        btnNext.textContent = 'Siguiente →';
+      }
+    }
+
+    function prevScene() {
+      if (currentSceneIndex > 0) {
+        currentSceneIndex--;
+        playSound('tap');
+        renderCurrentScene();
+      }
+    }
+
+    function nextScene() {
+      if (currentSceneIndex < currentStory.scenes.length - 1) {
+        currentSceneIndex++;
+        playSound('tap');
+        renderCurrentScene();
+      } else {
+        // Al terminar el cuarto paso, pasamos a la mesa de ordenación
+        setupChallenge();
+        goToScreen(3);
+      }
+    }
+
+    /* ==========================================================
+       PANTALLA 3: PREPARAR MESA DE ORDENACIÓN
+       ========================================================== */
+    function setupChallenge() {
+      // Reiniciar slots
+      slotOccupants = { 1: null, 2: null, 3: null, 4: null };
+      selectedCardForTouch = null;
+      document.getElementById('clueBox').classList.remove('visible');
+      document.getElementById('btnCheckOrder').disabled = true;
+
+      // Limpiar casillas en el DOM
+      const slots = document.querySelectorAll('.drop-slot');
+      slots.forEach(slot => {
+        slot.classList.remove('filled', 'drag-over');
+        const num = slot.getAttribute('data-slot');
+        slot.innerHTML = `
+          <span class="slot-index">${num}</span>
+          <span class="slot-placeholder-text">${getSlotHint(num)}</span>
+        `;
+      });
+
+      // Desordenar las 4 tarjetas (shuffle garantizando que no salgan ordenadas)
+      let indices = [1, 2, 3, 4];
+      do {
+        indices = indices.sort(() => Math.random() - 0.5);
+      } while (indices[0] === 1 && indices[1] === 2 && indices[2] === 3 && indices[3] === 4);
+
+      // Renderizar bandeja de tarjetas
+      const tray = document.getElementById('cardsTray');
+      tray.innerHTML = '';
+
+      indices.forEach(idx => {
+        const scene = currentStory.scenes.find(s => s.index === idx);
+        const card = createOrderCard(scene);
+        tray.appendChild(card);
+      });
+    }
+
+    function getSlotHint(slotNumber) {
+      if (slotNumber == 1) return '¿Cómo empezó la historia?';
+      if (slotNumber == 2) return '¿Qué sucedió después?';
+      if (slotNumber == 3) return 'El momento más emocionante...';
+      return '¿Cómo terminó el relato?';
+    }
+
+    function createOrderCard(scene) {
+      const card = document.createElement('div');
+      card.className = 'order-card';
+      card.id = `card-scene-${scene.index}`;
+      card.setAttribute('data-scene', scene.index);
+      card.setAttribute('draggable', 'true');
+
+      card.innerHTML = `
+        <div class="card-thumb">
+          <img src="${scene.image}" alt="Paso ${scene.index}" onerror="this.onerror=null; this.src='assets/portada_cerditos.jpg';">
+        </div>
+        <div class="card-phrase">${scene.cardSummary}</div>
+      `;
+
+      // Eventos de ratón HTML5 Drag & Drop
+      card.addEventListener('dragstart', handleDragStart);
+      card.addEventListener('dragend', handleDragEnd);
+
+      // Eventos de toque para arrastre móvil táctil
+      card.addEventListener('touchstart', handleTouchStart, { passive: false });
+      card.addEventListener('touchmove', handleTouchMove, { passive: false });
+      card.addEventListener('touchend', handleTouchEnd);
+
+      // Evento de toque asistido (clic simple)
+      card.addEventListener('click', (e) => {
+        e.stopPropagation();
+        handleCardTouchSelect(scene.index);
+      });
+
+      return card;
+    }
+
+    /* ==========================================================
+       MECÁNICA DUAL: TOQUE ASISTIDO (TAP TO MOVE)
+       ========================================================== */
+    function handleCardTouchSelect(sceneIndex) {
+      playSound('tap');
+
+      // Si ya está seleccionada, deseleccionamos
+      if (selectedCardForTouch === sceneIndex) {
+        selectedCardForTouch = null;
+        updateCardSelectionUI();
+        return;
+      }
+
+      selectedCardForTouch = sceneIndex;
+      updateCardSelectionUI();
+    }
+
+    function updateCardSelectionUI() {
+      document.querySelectorAll('.order-card').forEach(card => {
+        const sc = parseInt(card.getAttribute('data-scene'), 10);
+        if (sc === selectedCardForTouch) {
+          card.classList.add('selected-for-touch');
+        } else {
+          card.classList.remove('selected-for-touch');
+        }
+      });
+    }
+
+    function handleSlotClick(slotNumber) {
+      // Si tenemos una tarjeta seleccionada por toque, la colocamos aquí
+      if (selectedCardForTouch !== null) {
+        placeSceneInSlot(selectedCardForTouch, slotNumber);
+        selectedCardForTouch = null;
+        updateCardSelectionUI();
+      } else {
+        // Si no hay tarjeta seleccionada pero la casilla tiene tarjeta,
+        // al tocarla la devolvemos a la bandeja
+        if (slotOccupants[slotNumber] !== null) {
+          const sceneToReturn = slotOccupants[slotNumber];
+          removeSceneFromSlot(slotNumber);
+          returnSceneToTray(sceneToReturn);
+          playSound('tap');
+        }
+      }
+    }
+
+    function handleTrayClick() {
+      // Si el usuario toca la bandeja teniendo una tarjeta seleccionada, la deseleccionamos
+      if (selectedCardForTouch !== null) {
+        selectedCardForTouch = null;
+        updateCardSelectionUI();
+        playSound('tap');
+      }
+    }
+
+    /* ==========================================================
+       MECÁNICA DUAL: DRAG AND DROP NATIVO Y TÁCTIL
+       ========================================================== */
+    function handleDragStart(e) {
+      draggedSceneIndex = parseInt(this.getAttribute('data-scene'), 10);
+      e.dataTransfer.setData('text/plain', draggedSceneIndex);
+      this.style.opacity = '0.5';
+      playSound('tap');
+    }
+
+    function handleDragEnd(e) {
+      this.style.opacity = '1';
+      draggedSceneIndex = null;
+      document.querySelectorAll('.drop-slot').forEach(s => s.classList.remove('drag-over'));
+    }
+
+    // Configurar receptores de arrastre en las casillas
+    document.querySelectorAll('.drop-slot').forEach(slot => {
+      slot.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        slot.classList.add('drag-over');
+      });
+
+      slot.addEventListener('dragleave', () => {
+        slot.classList.remove('drag-over');
+      });
+
+      slot.addEventListener('drop', (e) => {
+        e.preventDefault();
+        slot.classList.remove('drag-over');
+        const sc = parseInt(e.dataTransfer.getData('text/plain'), 10) || draggedSceneIndex;
+        const slotNum = parseInt(slot.getAttribute('data-slot'), 10);
+        if (sc && slotNum) {
+          placeSceneInSlot(sc, slotNum);
+        }
+      });
+    });
+
+    /* Arrastre táctil en teléfonos móviles */
+    let touchDraggedEl = null;
+    let touchCloneEl = null;
+
+    function handleTouchStart(e) {
+      const touch = e.touches[0];
+      touchDraggedEl = this;
+      draggedSceneIndex = parseInt(this.getAttribute('data-scene'), 10);
+
+      // Crear clon flotante que sigue el dedo
+      touchCloneEl = this.cloneNode(true);
+      touchCloneEl.style.position = 'fixed';
+      touchCloneEl.style.left = `${touch.clientX - 60}px`;
+      touchCloneEl.style.top = `${touch.clientY - 30}px`;
+      touchCloneEl.style.width = '240px';
+      touchCloneEl.style.pointerEvents = 'none';
+      touchCloneEl.style.zIndex = '999';
+      touchCloneEl.style.opacity = '0.85';
+      touchCloneEl.style.transform = 'scale(1.05)';
+      document.body.appendChild(touchCloneEl);
+
+      this.style.opacity = '0.4';
+    }
+
+    function handleTouchMove(e) {
+      if (!touchCloneEl) return;
+      e.preventDefault(); // evitar scroll durante arrastre
+      const touch = e.touches[0];
+      touchCloneEl.style.left = `${touch.clientX - 60}px`;
+      touchCloneEl.style.top = `${touch.clientY - 30}px`;
+
+      // Comprobar colisión con casillas
+      const elemUnder = document.elementFromPoint(touch.clientX, touch.clientY);
+      const slot = elemUnder ? elemUnder.closest('.drop-slot') : null;
+      document.querySelectorAll('.drop-slot').forEach(s => s.classList.remove('drag-over'));
+      if (slot) {
+        slot.classList.add('drag-over');
+      }
+    }
+
+    function handleTouchEnd(e) {
+      if (touchCloneEl) {
+        touchCloneEl.remove();
+        touchCloneEl = null;
+      }
+      if (touchDraggedEl) {
+        touchDraggedEl.style.opacity = '1';
+      }
+
+      const touch = e.changedTouches[0];
+      const elemUnder = document.elementFromPoint(touch.clientX, touch.clientY);
+      const slot = elemUnder ? elemUnder.closest('.drop-slot') : null;
+      document.querySelectorAll('.drop-slot').forEach(s => s.classList.remove('drag-over'));
+
+      if (slot && draggedSceneIndex) {
+        const slotNum = parseInt(slot.getAttribute('data-slot'), 10);
+        placeSceneInSlot(draggedSceneIndex, slotNum);
+      }
+      draggedSceneIndex = null;
+      touchDraggedEl = null;
+    }
+
+    /* ==========================================================
+       GESTIÓN DE POSICIONES EN CASILLAS
+       ========================================================== */
+    function placeSceneInSlot(sceneIndex, targetSlotNumber) {
+      playSound('drop');
+
+      // Si la tarjeta ya estaba en otra casilla, liberamos esa casilla
+      for (let s = 1; s <= 4; s++) {
+        if (slotOccupants[s] === sceneIndex) {
+          slotOccupants[s] = null;
+          updateSlotDOM(s);
+        }
+      }
+
+      // Si la casilla de destino ya estaba ocupada por otra tarjeta,
+      // devolvemos la otra tarjeta a la bandeja
+      if (slotOccupants[targetSlotNumber] !== null) {
+        const oldScene = slotOccupants[targetSlotNumber];
+        returnSceneToTray(oldScene);
+      }
+
+      // Asignamos la tarjeta a la casilla
+      slotOccupants[targetSlotNumber] = sceneIndex;
+      updateSlotDOM(targetSlotNumber);
+
+      // Quitamos la tarjeta de la bandeja si estaba allí
+      const cardInTray = document.querySelector(`#cardsTray #card-scene-${sceneIndex}`);
+      if (cardInTray) {
+        cardInTray.remove();
+      }
+
+      // Comprobamos si las 4 casillas están llenas para activar el botón
+      checkButtonReadiness();
+    }
+
+    function removeSceneFromSlot(slotNumber) {
+      slotOccupants[slotNumber] = null;
+      updateSlotDOM(slotNumber);
+      checkButtonReadiness();
+    }
+
+    function returnSceneToTray(sceneIndex) {
+      const existing = document.querySelector(`#cardsTray #card-scene-${sceneIndex}`);
+      if (!existing) {
+        const scene = currentStory.scenes.find(s => s.index === sceneIndex);
+        const card = createOrderCard(scene);
+        document.getElementById('cardsTray').appendChild(card);
+      }
+    }
+
+    function updateSlotDOM(slotNumber) {
+      const slotEl = document.querySelector(`.drop-slot[data-slot="${slotNumber}"]`);
+      const sceneIndex = slotOccupants[slotNumber];
+
+      if (sceneIndex === null) {
+        slotEl.classList.remove('filled');
+        slotEl.innerHTML = `
+          <span class="slot-index">${slotNumber}</span>
+          <span class="slot-placeholder-text">${getSlotHint(slotNumber)}</span>
+        `;
+      } else {
+        const scene = currentStory.scenes.find(s => s.index === sceneIndex);
+        slotEl.classList.add('filled');
+        slotEl.innerHTML = `
+          <span class="slot-index">${slotNumber}</span>
+          <div class="card-thumb" style="margin-right:8px;">
+            <img src="${scene.image}" alt="Paso ${scene.index}">
+          </div>
+          <div class="card-phrase" style="flex:1;">${scene.cardSummary}</div>
+          <span style="color:#A8A29E; font-size:1.1rem; padding:4px;" title="Quitar">✕</span>
+        `;
+      }
+    }
+
+    function checkButtonReadiness() {
+      const allFilled = Object.values(slotOccupants).every(val => val !== null);
+      document.getElementById('btnCheckOrder').disabled = !allFilled;
+    }
+
+    /* ==========================================================
+       PANTALLA 4: EVALUACIÓN Y RETROALIMENTACIÓN FORMATIVA
+       ========================================================== */
+    function evaluateOrder() {
+      const isCorrect = (
+        slotOccupants[1] === 1 &&
+        slotOccupants[2] === 2 &&
+        slotOccupants[3] === 3 &&
+        slotOccupants[4] === 4
+      );
+
+      if (isCorrect) {
+        // ÉXITO: Acorde pentatónico sereno y avance a Pantalla 5
+        playSound('success');
+
+        // Borde verde esmeralda de confirmación
+        document.querySelectorAll('.drop-slot').forEach(slot => {
+          slot.style.borderColor = 'var(--accent-success)';
+          slot.style.borderWidth = '3px';
+        });
+
+        setTimeout(() => {
+          showFinalCelebration();
+        }, 800);
+
+      } else {
+        // ERROR: Retroalimentación amable no punitiva
+        playSound('clue');
+
+        let firstWrongSlot = null;
+        for (let s = 1; s <= 4; s++) {
+          if (slotOccupants[s] !== s) {
+            firstWrongSlot = s;
+            break;
+          }
+        }
+
+        // Anclamos las tarjetas bien colocadas y devolvemos las erróneas
+        for (let s = 1; s <= 4; s++) {
+          if (slotOccupants[s] !== null && slotOccupants[s] !== s) {
+            const scToReturn = slotOccupants[s];
+            removeSceneFromSlot(s);
+            returnSceneToTray(scToReturn);
+          }
+        }
+
+        // Mostrar pista contextual amable
+        const targetScene = currentStory.scenes.find(sc => sc.index === firstWrongSlot);
+        const clueEl = document.getElementById('clueBox');
+        document.getElementById('clueText').textContent = targetScene ? targetScene.clue : 'Revisa con calma qué sucedió en primer lugar.';
+        clueEl.classList.add('visible');
+
+        // Reset visual de casillas
+        document.querySelectorAll('.drop-slot').forEach(slot => {
+          slot.style.borderColor = '';
+          slot.style.borderWidth = '';
+        });
+      }
+    }
+
+    /* ==========================================================
+       PANTALLA 5: TIRA ILUSTRADA Y CIERRE
+       ========================================================== */
+    function showFinalCelebration() {
+      document.getElementById('finalHeroTitle').textContent = `¡Excelente, has ordenado ${currentStory.title}!`;
+      document.getElementById('finalHeroDesc').textContent = currentStory.moral;
+
+      // Renderizar tira continua horizontal de las 4 fases
+      const track = document.getElementById('finalTimelineTrack');
+      track.innerHTML = '';
+
+      currentStory.scenes.forEach(scene => {
+        const item = document.createElement('div');
+        item.className = 'final-card-item';
+        item.innerHTML = `
+          <div class="final-card-img">
+            <img src="${scene.image}" alt="Paso ${scene.index}">
+          </div>
+          <div class="final-card-info">
+            <div class="final-card-num">Paso ${scene.index} de 4</div>
+            <div class="final-card-text">${scene.cardSummary}</div>
+          </div>
+        `;
+        track.appendChild(item);
+      });
+
+      goToScreen(5);
+    }
+
+    function finishSession() {
+      playSound('tap');
+      alert('¡Gran sesión de lectura! Has ejercitado tu mente con calma. Puedes cerrar la ventana y descansar.');
+      goToScreen(1);
+    }
+
+    /* ==========================================================
+       MODAL DE ENFOQUE DEL PROYECTO
+       ========================================================== */
+    document.getElementById('infoBtn').addEventListener('click', () => {
+      toggleInfoModal(true);
+    });
+
+    function toggleInfoModal(show) {
+      playSound('tap');
+      const modal = document.getElementById('infoModalBackdrop');
+      if (show) {
+        modal.classList.add('open');
+      } else {
+        modal.classList.remove('open');
+      }
+    }
+
+    function closeInfoModal(e) {
+      if (e.target.id === 'infoModalBackdrop') {
+        toggleInfoModal(false);
+      }
+    }
+
+    /* ==========================================================
+       DICCIONARIO VISUAL AL TOQUE
+       ========================================================== */
+    function showGlossary(term, definition) {
+      playSound('tap');
+      document.getElementById('glossaryTerm').textContent = `📖 ${term}`;
+      document.getElementById('glossaryDesc').textContent = definition;
+      document.getElementById('glossaryModal').classList.add('open');
+    }
+
+    function closeGlossary() {
+      playSound('tap');
+      document.getElementById('glossaryModal').classList.remove('open');
+    }
+  </script>
+</body>
+</html>
